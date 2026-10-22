@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MatchItUp — Same match, two fans</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="compare-head">
+    <div>
+      <h1>Same match. Two genuinely different experiences.</h1>
+      <p>Left: a data-hungry analyst in English. Right: a casual Northgate fan watching in Hindi.</p>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn primary" id="restart">↻ Restart both</button>
+      <a class="btn ghost" href="/">Back to single view</a>
+    </div>
+  </header>
+  <main class="compare-wrap">
+    <iframe id="left" title="Analyst view" src="about:blank"></iframe>
+    <iframe id="right" title="Casual fan view" src="about:blank"></iframe>
+  </main>
+  <script>
+    const qs = new URLSearchParams(location.search);
+    const speed = qs.get("speed") || "30";
+    const left = `/?embed=1&autostart=1&mode=analyst&language=en&speed=${speed}`;
+    const right = `/?embed=1&autostart=1&mode=casual&language=${qs.get("lang") || "hi"}&favourite_club=NGA&speed=${speed}`;
+    function go() {
+      document.getElementById("left").src = left + "&r=" + Date.now();
+      document.getElementById("right").src = right + "&r=" + Date.now();
+    }
+    document.getElementById("restart").addEventListener("click", go);
+    go();
+  </script>
+</body>
+</html>

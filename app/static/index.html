@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MatchItUp — Live Match Intelligence</title>
+  <meta name="description" content="Explainable, personalised live match intelligence from synthetic football events.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%23C6F432'/><path d='M9 17l5 5 9-11' stroke='%230B1210' stroke-width='3.5' fill='none' stroke-linecap='round'/></svg>">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="logo-dot"></span>
+    <div>
+      <div class="brand-name">MatchItUp</div>
+      <div class="brand-sub">Live match intelligence · synthetic data</div>
+    </div>
+  </div>
+  <form id="controls" class="controls" autocomplete="off">
+    <div class="seg" role="radiogroup" aria-label="Viewing mode">
+      <label><input type="radio" name="mode" value="casual" checked><span>Casual fan</span></label>
+      <label><input type="radio" name="mode" value="analyst"><span>Analyst</span></label>
+      <label><input type="radio" name="mode" value="player_focus"><span>Player focus</span></label>
+    </div>
+    <label class="field"><span>Language</span>
+      <select name="language">
+        <option value="en">English</option>
+        <option value="hi">हिन्दी (Hindi)</option>
+        <option value="es">Español</option>
+        <option value="fr">Français</option>
+        <option value="pt">Português</option>
+        <option value="ar">العربية</option>
+        <option value="ja">日本語</option>
+      </select>
+    </label>
+    <label class="field"><span>My club</span>
+      <select name="favourite_club"><option value="">None</option></select>
+    </label>
+    <label class="field"><span>My player</span>
+      <select name="favourite_player"><option value="">None</option></select>
+    </label>
+    <label class="field"><span>Focus metric</span>
+      <select name="focus_metric">
+        <option value="">Everything</option>
+        <option value="chances">Chances</option>
+        <option value="speed">Speed</option>
+        <option value="passing">Passing</option>
+        <option value="pressing">Pressing</option>
+      </select>
+    </label>
+    <label class="field"><span>Speed</span>
+      <select name="speed">
+        <option value="15">15×</option>
+        <option value="30" selected>30×</option>
+        <option value="60">60×</option>
+        <option value="120">120×</option>
+      </select>
+    </label>
+    <button type="submit" class="btn primary" id="startBtn">▶ Kick off</button>
+    <a class="btn ghost" href="/compare" title="Analyst and casual fan side by side">Compare view</a>
+  </form>
+  <div id="aiStatus" class="ai-status" title="Where the narratives come from">…</div>
+</header>
+
+<main class="layout">
+  <section class="stage">
+    <div class="broadcast" id="broadcast">
+      <svg id="pitch" viewBox="-2 -2 109 72" preserveAspectRatio="xMidYMid meet" aria-label="Live pitch view">
+        <defs>
+          <pattern id="stripes" width="10.5" height="68" patternUnits="userSpaceOnUse">
+            <rect width="5.25" height="68" fill="var(--pitch-a)"/><rect x="5.25" width="5.25" height="68" fill="var(--pitch-b)"/>
+          </pattern>
+        </defs>
+        <rect x="0" y="0" width="105" height="68" fill="url(#stripes)"/>
+        <g class="lines">
+          <rect x="0" y="0" width="105" height="68"/>
+          <line x1="52.5" y1="0" x2="52.5" y2="68"/>
+          <circle cx="52.5" cy="34" r="9.15"/>
+          <rect x="0" y="13.84" width="16.5" height="40.32"/><rect x="88.5" y="13.84" width="16.5" height="40.32"/>
+          <rect x="0" y="24.84" width="5.5" height="18.32"/><rect x="99.5" y="24.84" width="5.5" height="18.32"/>
+          <rect x="-1.6" y="30.34" width="1.6" height="7.32"/><rect x="105" y="30.34" width="1.6" height="7.32"/>
+        </g>
+        <g id="trails"></g>
+        <g id="ballGroup" transform="translate(52.5 34)">
+          <circle r="1.6" class="ball-halo"/>
+          <circle r="0.9" class="ball"/>
+          <g id="tag" class="tag" transform="translate(1.8 -2.4)">
+            <rect id="tagBg" x="0" y="-2.3" width="18" height="3.2" rx="0.6"/>
+            <text id="tagText" x="0.8" y="0">—</text>
+          </g>
+        </g>
+      </svg>
+
+      <div class="scorebug" id="scorebug">
+        <span class="sb-team" id="sbHome">HOME</span>
+        <span class="sb-score" id="sbScore">0–0</span>
+        <span class="sb-team" id="sbAway">AWAY</span>
+        <span class="sb-clock" id="sbClock">0'</span>
+      </div>
+      <div class="rhythm-chip" id="rhythmChip" title="Game rhythm over the last 5 minutes">Balanced</div>
+
+      <div class="ov ov-top" id="ovTop" hidden></div>
+      <div class="ov ov-player" id="ovPlayer" hidden></div>
+      <div class="ov ov-lower" id="ovLower" hidden></div>
+      <div class="ov ov-banner" id="ovBanner" hidden></div>
+
+      <div class="splash" id="splash">
+        <h1>Every match, made for every fan.</h1>
+        <p>A synthetic match feed is turned into stats, explained by AI agents, and personalised for you — live.</p>
+        <button class="btn primary big" id="splashStart">▶ Kick off</button>
+      </div>
+    </div>
+
+    <div class="momentum-card">
+      <div class="mc-head">
+        <span>Momentum <small>(threat in the last 5 minutes)</small></span>
+        <span class="legend"><i class="lg-home"></i><b id="lgHome">Home</b><i class="lg-away"></i><b id="lgAway">Away</b></span>
+      </div>
+      <canvas id="momentum" height="90" aria-label="Momentum chart"></canvas>
+    </div>
+  </section>
+
+  <aside class="side">
+    <nav class="tabs" role="tablist">
+      <button role="tab" class="tab active" data-tab="feed">Insights <span id="feedCount" class="count">0</span></button>
+      <button role="tab" class="tab" data-tab="stats">Stats</button>
+      <button role="tab" class="tab" data-tab="ask">Ask</button>
+      <button role="tab" class="tab" data-tab="recap">Recap</button>
+    </nav>
+
+    <section class="panel active" id="panel-feed">
+      <div id="feed" class="feed">
+        <p class="empty">Insights appear here as the match unfolds. Each card shows <b>why</b> the moment matters and a receipt of how it was made.</p>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-stats">
+      <div class="stat-head"><span id="stHome">Home</span><span>Match stats</span><span id="stAway">Away</span></div>
+      <div id="statRows" class="stat-rows"></div>
+      <h3 class="sub">Top performers <small>(impact score)</small></h3>
+      <ol id="topPlayers" class="top-players"></ol>
+    </section>
+
+    <section class="panel" id="panel-ask">
+      <p class="hint">Ask the Analyst agent anything about this match. It calls read-only stat tools and only uses the numbers they return.</p>
+      <form id="askForm" class="ask-form">
+        <input id="askInput" name="q" maxlength="300" placeholder="e.g. Who is controlling midfield?" required>
+        <button class="btn primary" type="submit">Ask</button>
+      </form>
+      <div class="chips" id="askChips">
+        <button type="button" class="chip">Who has been the best player so far?</button>
+        <button type="button" class="chip">How is Northgate pressing?</button>
+        <button type="button" class="chip">Which team is creating better chances?</button>
+        <button type="button" class="chip">Who is the fastest player?</button>
+      </div>
+      <div id="askLog" class="ask-log"></div>
+    </section>
+
+    <section class="panel" id="panel-recap">
+      <div id="recap" class="recap"><p class="empty">An automated recap is written at half-time and full-time.</p></div>
+    </section>
+  </aside>
+</main>
+
+<footer class="foot">
+  100% synthetic data — all clubs, players and venues are fictional. ·
+  <a href="/api/overlays" target="_blank" rel="noopener">Overlay JSON</a> ·
+  <a href="/api/events" target="_blank" rel="noopener">Event feed</a> ·
+  <a href="/docs" target="_blank" rel="noopener">API</a>
+</footer>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
