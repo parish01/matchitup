@@ -68,7 +68,6 @@ flowchart LR
 | **Microsoft Entra ID / managed identity** | Keyless auth from the app to Foundry (`DefaultAzureCredential`); no API keys in code or config. |
 | **Azure Container Apps** | Hosting with HTTP autoscaling and revisions (`infra/deploy-aca.sh`). |
 | **Azure Monitor Application Insights + OpenTelemetry** | Each agent step is exported as a span when a connection string is set. |
-| **GitHub Models** | Free model endpoint for local development (`LLM_PROVIDER=github`). |
 | **GitHub Codespaces, Actions, Copilot** | One-click dev environment (`.devcontainer`), CI test run on every push, Copilot extension preinstalled. |
 
 ## Quick start
@@ -89,7 +88,7 @@ uvicorn app.main:app --reload
 # open http://localhost:8000
 ```
 
-It runs immediately in **template mode**. To switch on the AI agents, copy `.env.example` to `.env` and set either the Foundry (Azure OpenAI) or GitHub Models values, then restart.
+It runs immediately in **template mode**. To switch on the AI agents, copy `.env.example` to `.env`, set the Microsoft Foundry (Azure OpenAI) values, then restart.
 
 ### Run the tests
 ```bash
@@ -146,7 +145,7 @@ Event example:
 matchitup/
   generator.py        synthetic match generator (stage 1 data)
   engine.py           deterministic stats + key-moment detection (stage 2)
-  llm.py              Foundry / GitHub Models client with receipts
+  llm.py              Microsoft Foundry (Azure OpenAI) client with receipts
   templates.py        grounded fallback narratives (English, Hindi)
   telemetry.py        agent step timing + OpenTelemetry export
   agents/

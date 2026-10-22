@@ -11,7 +11,7 @@ Live football graphics are one-size-fits-all: analysts want depth, casual fans w
 - Microsoft Entra ID managed identity — keyless access from the app to Foundry
 - Azure Container Apps — hosting with autoscaling and revisions
 - Azure Monitor Application Insights + OpenTelemetry — per-agent traces
-- GitHub Models (local development), GitHub Codespaces, GitHub Actions CI, GitHub Copilot
+- GitHub Codespaces, GitHub Actions CI, GitHub Copilot
 
 ## Problem it solves
 Broadcasters and streaming platforms can produce one explainable, verified insight per moment and deliver it as many genuinely different experiences — analyst or casual, English or Hindi, home or away fan — automatically and at live speed, without risking invented statistics on screen.

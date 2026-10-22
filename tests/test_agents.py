@@ -118,3 +118,22 @@ def test_analyst_out_of_scope_and_offline(played):
     assert out["out_of_scope"]
     offline = analyst.ask("How are Northgate doing?", eng, {}, LLMClient(force_offline=True))
     assert "Northgate Athletic" in offline["answer"] and offline["verification"]["grounded"]
+
+
+def test_llm_handles_text_replies_from_gateways():
+    import json as _json
+
+    import pytest
+
+    from matchitup.llm import LLMUnavailable, _coerce_completion
+
+    body = {"id": "x", "object": "chat.completion", "created": 1, "model": "m",
+            "choices": [{"index": 0, "finish_reason": "stop",
+                         "message": {"role": "assistant", "content": "{\"a\": 1}"}}],
+            "usage": {"prompt_tokens": 3, "completion_tokens": 2, "total_tokens": 5}}
+    resp = _coerce_completion(_json.dumps(body))
+    assert resp.choices[0].message.content == "{\"a\": 1}" and resp.usage.prompt_tokens == 3
+    with pytest.raises(LLMUnavailable, match="non-JSON"):
+        _coerce_completion("<html>blocked</html>")
+    with pytest.raises(LLMUnavailable, match="Unauthorized"):
+        _coerce_completion(_json.dumps({"error": {"message": "Unauthorized"}}))

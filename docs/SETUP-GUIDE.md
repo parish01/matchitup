@@ -2,7 +2,7 @@
 
 You need: a web browser, your GitHub account, and (for Part D) a Microsoft account with a phone and a debit/credit card for Azure verification. Everything else runs in the cloud, so nothing has to be installed on your computer.
 
-Time needed: Parts A–C about 45 minutes; Part D about 45 minutes.
+Time needed: Parts A–B about 30 minutes; Part D about 45 minutes.
 
 ---
 
@@ -34,7 +34,7 @@ Time needed: Parts A–C about 45 minutes; Part D about 45 minutes.
    ```
    A pop-up says the app is running on port 8000 → click **Open in Browser**. Click **Kick off**.
 
-   The badge at the top right says **Template mode**. Everything works; the narratives come from grounded templates until you connect a model in Part C or D.
+   The badge at the top right says **Template mode**. Everything works; the narratives come from grounded templates until you connect a Microsoft Foundry model in Part D.
 
 7. (Optional) To use the preconfigured environment (Azure CLI, Copilot extension), press **F1** → **Codespaces: Rebuild Container**.
 
@@ -55,28 +55,9 @@ Using Copilot for your changes is worth mentioning in the pitch and the video, s
 
 ---
 
-## Part C — Switch on the AI agents for free with GitHub Models (10 min)
+## Part C — (removed)
 
-1. Go to **https://github.com/settings/personal-access-tokens/new** (Fine-grained token).
-   - Token name: `matchitup-models`, expiration: 30 days
-   - Under **Account permissions**, set **Models** to **Read-only**
-   - Click **Generate token** and copy it.
-2. In the Codespace terminal:
-   ```bash
-   cp .env.example .env
-   ```
-   Open `.env` and add these three lines at the bottom (paste your token):
-   ```
-   LLM_PROVIDER=github
-   GITHUB_MODELS_TOKEN=github_pat_xxxxxxxx
-   GITHUB_MODEL=openai/gpt-4.1-mini
-   ```
-3. Stop the app (**Ctrl+C**) and start it again with `uvicorn app.main:app --reload`. The badge now shows **AI live · github**.
-
-Notes:
-- `.env` is in `.gitignore`, so your token is never pushed to GitHub.
-- The free tier has rate limits. Use speed **15×–30×** and one browser tab when AI is on. If the limit is hit, cards automatically fall back to templates; the receipt shows why.
-- If the model name is rejected, open the GitHub Models catalogue (**https://github.com/marketplace/models**) and copy the exact name of a small chat model.
+GitHub Models was retired by GitHub on 30 July 2026, so the free GitHub route no longer exists. The AI agents run on **Microsoft Foundry** instead (Part D). Until then the app works fully in template mode.
 
 ---
 
@@ -111,7 +92,7 @@ MODEL_NAME=gpt-4.1-mini MODEL_VERSION=2025-04-14 LOCATION=eastus2 bash infra/dep
 ```
 
 ### D3. Use the Azure model in the Codespace too (optional)
-The script prints three lines for `.env` and one `az role assignment` command. Run that command, replace the GitHub Models lines in `.env` with the Azure ones, and restart the app.
+The script prints three lines for `.env` and one `az role assignment` command. Run that command, add the three lines to `.env`, and restart the app.
 
 ### D4. Costs and clean-up
 - The app keeps one small replica running during judging, and model calls cost very little at this scale. Check **Cost Management** in the portal occasionally.
@@ -137,7 +118,7 @@ On your project page, fill in:
 - **GitHub repository:** `https://github.com/parish01/matchitup`
 - **Demo video:** your YouTube link
 - **Project pitch:** copy from `docs/pitch.md`
-- **Technologies:** Microsoft Foundry (Azure OpenAI), Azure Container Apps, Microsoft Entra ID managed identity, Application Insights / OpenTelemetry, GitHub Models, GitHub Codespaces, GitHub Actions, GitHub Copilot
+- **Technologies:** Microsoft Foundry (Azure OpenAI), Azure Container Apps, Microsoft Entra ID managed identity, Application Insights / OpenTelemetry, GitHub Codespaces, GitHub Actions, GitHub Copilot
 - Optionally the live URL from Part D.
 
 Submit well before the deadline and check that the repository is public by opening it in a private/incognito browser window.

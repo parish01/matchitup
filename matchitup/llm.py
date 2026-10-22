@@ -1,11 +1,11 @@
-"""Model client for Microsoft Foundry (Azure OpenAI) and GitHub Models.
+"""Model client for Microsoft Foundry (Azure OpenAI).
 
 Provider selection (env ``LLM_PROVIDER``):
 
 * ``azure``   - Microsoft Foundry / Azure OpenAI deployment. Uses keyless
                 Microsoft Entra ID auth (``DefaultAzureCredential`` /
                 managed identity) unless ``AZURE_OPENAI_API_KEY`` is set.
-* ``github``  - GitHub Models (free tier, good for local development).
+* ``github``  - any OpenAI-compatible endpoint (``GITHUB_MODELS_ENDPOINT``); kept for testing.
 * ``offline`` - no model; agents fall back to deterministic templates.
 
 If ``LLM_PROVIDER`` is unset, ``azure`` is used when ``AZURE_OPENAI_ENDPOINT``
@@ -133,6 +133,7 @@ class LLMClient:
                 else:
                     raise
             latency = int((time.perf_counter() - start) * 1000)
+        resp = _coerce_completion(resp)
         return resp.choices[0].message, resp.usage, latency
 
     def complete_json(self, system: str, user: str, max_tokens: int | None = None) -> tuple[dict[str, Any], Receipt]:
@@ -143,6 +144,27 @@ class LLMClient:
                           getattr(usage, "prompt_tokens", 0) or 0,
                           getattr(usage, "completion_tokens", 0) or 0)
         return parse_json(msg.content or "{}"), receipt
+
+
+def _coerce_completion(resp: Any) -> Any:
+    """Some gateways reply without a JSON content-type, so the SDK hands back raw text.
+
+    Parse that text into a normal ChatCompletion; if it is not a completion at all
+    (an error page or message), raise with the start of the reply so the receipt shows why.
+    """
+    if hasattr(resp, "choices"):
+        return resp
+    raw = resp if isinstance(resp, str) else str(resp)
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError:
+        raise LLMUnavailable(f"Model endpoint returned non-JSON: {raw[:160]!r}") from None
+    if isinstance(data, dict) and data.get("choices"):
+        from openai.types.chat import ChatCompletion
+
+        return ChatCompletion.model_validate(data)
+    detail = data.get("error", data) if isinstance(data, dict) else data
+    raise LLMUnavailable(f"Model endpoint error: {str(detail)[:200]}")
 
 
 def parse_json(text: str) -> dict[str, Any]:
