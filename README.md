@@ -5,6 +5,9 @@
 Built for the *Inside the Game: Developer Hackathon* (Microsoft × Premier League).
 All data is **100% synthetic**: clubs, players and the venue are fictional.
 
+**▶ Demo video:** https://youtu.be/X1Cz7YVOzzU?si=i6D-ygF1zT2sEZSu
+**🌐 Live app:** https://matchitup.icycoast-b3e96a07.swedencentral.azurecontainerapps.io
+
 ---
 
 ## The problem
