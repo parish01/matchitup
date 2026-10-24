@@ -30,6 +30,8 @@ az extension add --name application-insights --upgrade --only-show-errors || tru
 az provider register --namespace Microsoft.App --wait
 az provider register --namespace Microsoft.OperationalInsights --wait
 az provider register --namespace Microsoft.CognitiveServices --wait
+az provider register --namespace Microsoft.ContainerRegistry --wait
+az provider register --namespace Microsoft.Insights --wait
 
 az group create -n "$RG" -l "$LOCATION" -o none
 
